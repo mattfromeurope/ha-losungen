@@ -309,51 +309,51 @@ PAP-Symbole in Mermaid: `([Start/Ende])` = Terminal, `[...]` = Verarbeitung,
 
 ```mermaid
 flowchart TD
-    A([Start: async_setup_entry]) --> B[Coordinator erzeugen]
-    B --> C[async_config_entry_first_refresh]
-    C --> D{erstes Update erfolgreich?}
-    D -- "nein (UpdateFailed)" --> E([Ende: HA wirft ConfigEntryNotReady,<br/>automatischer Retry später])
-    D -- ja --> F[entry.runtime_data = coordinator]
-    F --> G[Plattform SENSOR laden<br/>(async_forward_entry_setups)]
-    G --> H([Ende: True – 4 Sensoren registriert])
+    A(["Start: async_setup_entry"]) --> B["Coordinator erzeugen"]
+    B --> C["async_config_entry_first_refresh"]
+    C --> D{"erstes Update erfolgreich?"}
+    D -- "nein (UpdateFailed)" --> E(["Ende: HA wirft ConfigEntryNotReady,<br/>automatischer Retry später"])
+    D -- ja --> F["entry.runtime_data = coordinator"]
+    F --> G["Plattform SENSOR laden<br/>(async_forward_entry_setups)"]
+    G --> H(["Ende: True – 4 Sensoren registriert"])
 ```
 
 ### 6.2 `LosungenCoordinator._async_update_data` ( Kern des Polls)
 
 ```mermaid
 flowchart TD
-    A([Start: Poll alle 30 min]) --> B["today = lokales Datum (ISO)<br/>year = today[:4]"]
-    B --> C{heute in _cache[year]?}
-    C -- ja --> D[/Cache zurückgeben – kein HTTP/]
-    D --> Z([Ende])
-    C -- nein --> E[async_fetch_year(hass, year)]
-    E --> F{Download + Parsen OK?}
-    F -- "nein: LosungenAPIError" --> G[UpdateFailed werfen<br/>(Entities unavailable, Retry später)]
+    A(["Start: Poll alle 30 min"]) --> B["today = lokales Datum (ISO)<br/>year = today[:4]"]
+    B --> C{"heute in _cache[year]?"}
+    C -- ja --> D[/"Cache zurückgeben – kein HTTP"/]
+    D --> Z(["Ende"])
+    C -- nein --> E["async_fetch_year(hass, year)"]
+    E --> F{"Download + Parsen OK?"}
+    F -- "nein: LosungenAPIError" --> G["UpdateFailed werfen<br/>(Entities unavailable, Retry später)"]
     G --> Z
-    F -- ja --> H{heute in data enthalten?}
-    H -- nein --> I[UpdateFailed werfen]
+    F -- ja --> H{"heute in data enthalten?"}
+    H -- nein --> I["UpdateFailed werfen"]
     I --> Z
-    H -- ja --> J[_cache = {year: data}]
-    J --> K[/data zurückgeben/]
-    K --> Z([Ende])
+    H -- ja --> J["_cache = {year: data}"]
+    J --> K[/"data zurückgeben"/]
+    K --> Z
 ```
 
 ### 6.3 `async_fetch_year` (Netzwerk + Parsen)
 
 ```mermaid
 flowchart TD
-    A([Start: async_fetch_year(year)]) --> B[url = BASE_URL.format(year)]
-    B --> C[/aiohttp GET mit User-Agent, Timeout 60 s/]
-    C --> D{HTTP-Status}
-    D -- 404 --> E[LosungenConnectionError werfen]
-    D -- "sonstiger Fehler" --> F[raise_for_status / ClientError fangen]
+    A(["Start: async_fetch_year(year)"]) --> B["url = BASE_URL.format(year)"]
+    B --> C[/"aiohttp GET mit User-Agent, Timeout 60 s"/]
+    C --> D{"HTTP-Status"}
+    D -- 404 --> E["LosungenConnectionError werfen"]
+    D -- "sonstiger Fehler" --> F["raise_for_status / ClientError fangen"]
     F --> E
-    D -- 200 --> G[/Body als Bytes lesen/]
-    G --> H[parse_losungen_zip im Executor-Thread<br/>(blockierende Arbeit nicht im Eventloop)]
-    H --> I{parse OK?}
-    I -- "nein: BadZipFile/ParseError" --> J[LosungenParseError werfen]
-    I -- ja --> K[/dict {ISO-Datum: LosungDay} zurückgeben/]
-    K --> Z([Ende])
+    D -- 200 --> G[/"Body als Bytes lesen"/]
+    G --> H["parse_losungen_zip im Executor-Thread<br/>(blockierende Arbeit nicht im Eventloop)"]
+    H --> I{"parse OK?"}
+    I -- "nein: BadZipFile/ParseError" --> J["LosungenParseError werfen"]
+    I -- ja --> K[/"dict {ISO-Datum: LosungDay} zurückgeben"/]
+    K --> Z(["Ende"])
     E --> Z
     J --> Z
 ```
@@ -362,25 +362,25 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A([Start: parse_losungen_zip]) --> B[zipfile.ZipFile(BytesIO(bytes))]
-    B --> C{erste .xml in namelist?}
-    C -- nein --> D[LosungenParseError: ZIP ohne XML]
-    C -- ja --> E[/zf.read(xml-name)/]
-    E --> F[parse_losungen_xml]
-    F --> G[ET.fromstring -> root]
-    G --> H{ParseError?}
-    H -- ja --> I[LosungenParseError: ungültiges XML]
-    H -- nein --> J[for node in root.iter('Losungen')]
+    A(["Start: parse_losungen_zip"]) --> B["zipfile.ZipFile(BytesIO(bytes))"]
+    B --> C{"erste .xml in namelist?"}
+    C -- nein --> D["LosungenParseError: ZIP ohne XML"]
+    C -- ja --> E[/"zf.read(xml-name)"/]
+    E --> F["parse_losungen_xml"]
+    F --> G["ET.fromstring -> root"]
+    G --> H{"ParseError?"}
+    H -- ja --> I["LosungenParseError: ungültiges XML"]
+    H -- nein --> J["for node in root.iter('Losungen')"]
     J --> K["date = normalize_date(<Datum>)"]
-    K --> L{date leer?}
+    K --> L{"date leer?"}
     L -- ja --> J
     L -- nein --> M["LosungDay bauen:<br/>Texte roh + clean_text(),<br/>Verse/Wtag/Sonntag ueber _text()"]
-    M --> N[days[date] = LosungDay]
+    M --> N["days[date] = LosungDay"]
     N --> J
-    J --> O{leere Ergebnismenge?}
-    O -- ja --> P[LosungenParseError: keine Einträge]
-    O -- nein --> Q[/days zurückgeben/]
-    Q --> Z([Ende])
+    J --> O{"leere Ergebnismenge?"}
+    O -- ja --> P["LosungenParseError: keine Einträge"]
+    O -- nein --> Q[/"days zurückgeben"/]
+    Q --> Z(["Ende"])
     D --> Z
     I --> Z
     P --> Z
@@ -390,19 +390,19 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A([Start: HA liest Entity-State]) --> B{coordinator.data vorhanden?}
-    B -- nein --> C[return None -> State 'unknown']
+    A(["Start: HA liest Entity-State"]) --> B{"coordinator.data vorhanden?"}
+    B -- nein --> C["return None -> State 'unknown'"]
     B -- ja --> D["day = data.get(heute ISO)"]
-    D --> E{day = None?}
+    D --> E{"day = None?"}
     E -- ja --> C
     E -- nein --> F["value = value_fn(day)<br/>(z. B. day.lehrtext)"]
-    F --> G{len(value) > 255?}
-    G -- ja --> H[auf 254 Zeichen kürzen + '…']
-    G -- nein --> I[value unverändert]
-    H --> J[/State = value/]
+    F --> G{"len(value) > 255?"}
+    G -- ja --> H["auf 254 Zeichen kürzen + '…'"]
+    G -- nein --> I["value unverändert"]
+    H --> J[/"State = value"/]
     I --> J
-    J --> K[Attribute: datum, wochentag, sonntag,<br/>alle 4 Texte/Verse ungekürzt,<br/>bei Text-Sensoren: text_markdown]
-    K --> Z([Ende])
+    J --> K["Attribute: datum, wochentag, sonntag,<br/>alle 4 Texte/Verse ungekürzt,<br/>bei Text-Sensoren: text_markdown"]
+    K --> Z(["Ende"])
 ```
 
 ---
@@ -508,18 +508,18 @@ Poll-Zyklus der Integration als EPK:
 
 ```mermaid
 flowchart LR
-    E1{{Ereignis:<br/>HA-Timer alle 30 min abgelaufen<br/>oder erster Start}}
-    E1 --> F1(Funktion:<br/>Coordinator._async_update_data)
-    F1 --> X1{XOR}
-    X1 -- "Cache-Treffer:<br/>heute schon geladen" --> E2{{Ereignis:<br/>Daten aus Cache übernommen}}
-    X1 -- "Cache verfehlt:<br/>neuer Tag / leerer Cache" --> F2(Funktion:<br/>api.async_fetch_year:<br/>HTTP GET + ZIP/XML parsen)
-    F2 --> X2{XOR}
-    X2 -- OK --> E3{{Ereignis:<br/>Jahrgang erfolgreich geladen<br/>und im Cache}}
-    X2 -- Fehler --> E4{{Ereignis:<br/>Update fehlgeschlagen<br/>(Entities 'unavailable')}}
-    E2 --> F3(Funktion:<br/>HA verteilt Daten an Entities:<br/>native_value / Attribute neu lesen)
+    E1{{"Ereignis:<br/>HA-Timer alle 30 min abgelaufen<br/>oder erster Start"}}
+    E1 --> F1("Funktion:<br/>Coordinator._async_update_data")
+    F1 --> X1{"XOR"}
+    X1 -- "Cache-Treffer:<br/>heute schon geladen" --> E2{{"Ereignis:<br/>Daten aus Cache übernommen"}}
+    X1 -- "Cache verfehlt:<br/>neuer Tag / leerer Cache" --> F2("Funktion:<br/>api.async_fetch_year:<br/>HTTP GET + ZIP/XML parsen")
+    F2 --> X2{"XOR"}
+    X2 -- OK --> E3{{"Ereignis:<br/>Jahrgang erfolgreich geladen<br/>und im Cache"}}
+    X2 -- Fehler --> E4{{"Ereignis:<br/>Update fehlgeschlagen<br/>(Entities 'unavailable')"}}
+    E2 --> F3("Funktion:<br/>HA verteilt Daten an Entities:<br/>native_value / Attribute neu lesen")
     E3 --> F3
-    E4 --> F4(Funktion:<br/>Retry beim nächsten Poll<br/>(bzw. ConfigEntryNotReady beim Start))
-    F3 --> E5{{Ereignis:<br/>Sensoren aktualisiert,<br/>Dashboard-Cards zeigen neue Werte}}
+    E4 --> F4("Funktion:<br/>Retry beim nächsten Poll<br/>(bzw. ConfigEntryNotReady beim Start)")
+    F3 --> E5{{"Ereignis:<br/>Sensoren aktualisiert,<br/>Dashboard-Cards zeigen neue Werte"}}
     F4 --> E1
 ```
 
