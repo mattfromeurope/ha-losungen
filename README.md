@@ -74,6 +74,12 @@ content: |-
   > {{ state_attr('sensor.losungen_lehrtext', 'lehrtext') }}
 ```
 
+## Dokumentation
+
+Die ausführliche Entwurfsdokumentation mit Systemkontext, UML (Klassen-, Sequenz-,
+Zustandsdiagramme), ER-Diagramm, Programmablaufplänen, Struktogrammen und EPK
+liegt in [docs/DOKUMENTATION.md](docs/DOKUMENTATION.md).
+
 ## Code-Architektur / Datei-Übersicht
 
 Datenfluss: `config_flow.py` legt den Eintrag an → `__init__.py` startet den
