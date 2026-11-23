@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Losungen einrichten",
+        "description": "Stellt die Tageslosung und den Lehrtext der Herrnhuter Brüdergemeine (losungen.de) als Sensoren bereit.",
+        "data": {}
+      }
+    },
+    "abort": {
+      "already_configured": "Bereits konfiguriert."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "losungstext": { "name": "Tageslosung" },
+      "losungsvers": { "name": "Tageslosung Bibelstelle" },
+      "lehrtext": { "name": "Lehrtext" },
+      "lehrtextvers": { "name": "Lehrtext Bibelstelle" }
+    }
+  }
+}

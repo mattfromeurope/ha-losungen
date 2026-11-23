@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Losungen",
+        "description": "Provides the daily watchword (Losung) and the teaching text (Lehrtext) of the Herrnhuter Brüdergemeine (losungen.de) as sensors.",
+        "data": {}
+      }
+    },
+    "abort": {
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "losungstext": { "name": "Daily watchword" },
+      "losungsvers": { "name": "Watchword verse" },
+      "lehrtext": { "name": "Teaching text" },
+      "lehrtextvers": { "name": "Teaching text verse" }
+    }
+  }
+}

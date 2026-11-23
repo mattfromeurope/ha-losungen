@@ -1,0 +1,11 @@
+{
+  "domain": "losungen",
+  "name": "Losungen",
+  "codeowners": ["@mattfromeurope"],
+  "config_flow": true,
+  "documentation": "https://github.com/mattfromeurope/ha-losungen",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/mattfromeurope/ha-losungen/issues",
+  "version": "0.1.0"
+}
