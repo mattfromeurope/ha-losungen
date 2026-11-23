@@ -1,4 +1,9 @@
-"""Import smoke test for all integration modules. Requires Home Assistant."""
+"""Import-Smoke-Test: Alle Module der Integration müssen sich importieren lassen.
+
+Läuft nur, wenn `homeassistant` installiert ist (CI installiert es; lokal
+reicht `pip install homeassistant`). pytest.importorskip überspringt den Test
+sauber, falls HA fehlt.
+"""
 
 from __future__ import annotations
 
@@ -8,6 +13,7 @@ import pytest
 
 pytest.importorskip("homeassistant")
 
+# Alle Python-Module der Integration (Paket + Untermodule).
 MODULES = (
     "custom_components.losungen",
     "custom_components.losungen.api",
@@ -22,4 +28,5 @@ MODULES = (
 
 @pytest.mark.parametrize("module", MODULES)
 def test_import(module: str) -> None:
+    """Jedes Modul muss ohne Importfehler laden (fängt Tippfehler/Syntaxfehler ab)."""
     importlib.import_module(module)

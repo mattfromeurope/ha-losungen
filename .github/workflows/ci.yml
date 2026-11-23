@@ -1,18 +1,22 @@
+# CI für die Integration: läuft bei jedem Push und Pull Request.
+# Zwei Jobs:
+#  - validate: schneller Check ohne Abhängigkeiten (Manifest, JSONs, Syntax)
+#  - test:     pytest inkl. Import-Smoke gegen eine echte HA-Installation
 name: CI
 
 on:
   push:
-    branches: [main, "vibe/*"]
-  pull_request:
+    branches: [main, "vibe/*"]  # alle Feature-Branches (vibe/...)
+  pull_request:  # plus jeder PR
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4  # Repo auschecken
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.12"  # HA 2024.11+ läuft auf Python 3.12
       - run: python scripts/validate_integration.py
 
   test:
@@ -22,5 +26,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      # pytest für die Tests; homeassistant für den Import-Smoke-Test
+      # (tests/test_imports.py überspringt sich ohne HA via importorskip).
       - run: pip install pytest homeassistant
       - run: python -m pytest tests -q

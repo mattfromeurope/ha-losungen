@@ -74,6 +74,31 @@ content: |-
   > {{ state_attr('sensor.losungen_lehrtext', 'lehrtext') }}
 ```
 
+## Code-Architektur / Datei-Übersicht
+
+Datenfluss: `config_flow.py` legt den Eintrag an → `__init__.py` startet den
+`coordinator.py` → der Coordinator lädt über `api.py` die Jahres-ZIP von
+losungen.de → `parser.py` entpackt/parst sie → `sensor.py` macht daraus die vier
+Sensoren. Alle `.py`-Dateien sind dafür zeilenweise kommentiert.
+
+| Datei | Zweck |
+|---|---|
+| `custom_components/losungen/manifest.json` | Pflicht-Metadaten für HA/HACS: `domain` (muss = Ordnername sein), `name`, `version` (Pflicht bei Custom Integrations), `config_flow: true` (Einrichtung über die UI), `iot_class: cloud_polling` (holt Daten aus dem Internet), `integration_type`, `documentation`/`issue_tracker` (Links), `codeowners` |
+| `.../const.py` | alle Konstanten an einer Stelle (Domain, URL, Attributnamen, Limits) |
+| `.../parser.py` | reiner XML/ZIP-Parser, nur Standardbibliothek, ohne HA-Imports (dadurch allein testbar) |
+| `.../api.py` | einzige Netzwerk-Stelle: lädt die Jahres-ZIP per aiohttp (gemeinsame HA-Session) und parst im Executor-Thread |
+| `.../coordinator.py` | `DataUpdateCoordinator`: lädt 1× pro Tag, cached im RAM, verteilt die Daten an die Sensoren |
+| `.../entity.py` | gemeinsame Basisklasse: koppelt Entities an den Coordinator und gruppiert sie unter dem Gerät „Losungen“ |
+| `.../sensor.py` | die vier Sensoren (Definition + State + Attribute) |
+| `.../config_flow.py` | UI-Einrichtung (einmalig, `unique_id` verhindert Duplikate) |
+| `.../__init__.py` | Einstiegspunkt: `async_setup_entry`/`async_unload_entry`, startet Coordinator + Sensor-Plattform |
+| `.../strings.json` | Texte für Config Flow + Sensor-Namen (Englisch, Quelle für Übersetzungen) |
+| `.../translations/de.json`, `en.json` | Übersetzungen derselben Texte (de/en); JSON erlaubt keine Kommentare |
+| `hacs.json` | HACS-Metadaten: Anzeigename + `homeassistant` = älteste unterstützte HA-Version |
+| `scripts/validate_integration.py` | schneller Check ohne HA: Manifest/JSONs/Syntax (siehe unten) |
+| `tests/` | pytest: `test_parse.py` (Parser, ohne HA), `test_imports.py` (Import-Smoke mit HA) |
+| `.github/workflows/ci.yml` | GitHub Actions: führt Validator + pytest bei jedem Push/PR aus |
+
 ## Entwicklung
 
 ```bash
